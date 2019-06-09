@@ -1,0 +1,42 @@
+#test {
+    max-width: 600px;
+}
+
+ion-col {
+    padding: 0 2px 0 2px;
+}
+
+ion-grid {
+    padding: 0 0 5px 0;
+}
+
+#peopleList {
+    max-width: 800px;
+    margin: auto;
+}
+
+.profilItem {
+    cursor: pointer;
+}
+
+.profilItem:hover {
+    --ion-background-color: #EEE;
+}
+
+#profilContainer {
+    max-width: 800px;
+    margin: auto;
+    margin-top: 1em;
+    padding: 0 .5em 0 .5em;
+}
+
+.avatar {
+    width: 100px;
+    margin: auto;
+    margin-bottom: 1em;
+}
+
+.info {
+    margin: 0 1em 0 1em;
+    text-align: justify;
+}

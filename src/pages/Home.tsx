@@ -1,23 +1,17 @@
-import { IonContent, IonHeader, IonTitle, IonToolbar } from '@ionic/react';
+import { IonContent, IonImg, IonButton} from '@ionic/react';
 import React from 'react';
 
-const Home: React.SFC<any> = () => {
+import './Home.css';
+
+const Home: React.SFC<any> = ({history}) => {
   return (
     <>
-      <IonHeader>
-        <IonToolbar>
-          <IonTitle>Ionic Blank</IonTitle>
-        </IonToolbar>
-      </IonHeader>
+      <IonImg id="profbookIcon" src="/assets/icon/icon.png" />
       <IonContent padding>
-        The world is your oyster.
-        <p>
-          If you get lost, the{' '}
-          <a target="_blank" rel="noopener" href="https://ionicframework.com/docs/">
-            docs
-          </a>{' '}
-          will be your guide.
-        </p>
+       <h1 className="title">ProfBook</h1>
+       <IonButton style={{marginTop: "15vh"}} class="button" color="primary" onClick={() => {
+         history.push('/connexion');
+       }}>Connexion</IonButton>
       </IonContent>
     </>
   );

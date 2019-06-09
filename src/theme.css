@@ -18,7 +18,15 @@
 // https://beta.ionicframework.com/docs/theming/color-generator
 */
 
+@font-face {
+	font-family: "Comfortaa";
+	src: url('/assets/fonts/Comfortaa.ttf');
+}
+
 :root {
+  --ion-toolbar-background: #3a559f;
+  --ion-font-family: 'Comfortaa';
+
   --ion-color-angular: #ac282b;
   --ion-color-communication: #8e8d93;
   --ion-color-tooling: #fe4c52;
@@ -170,7 +178,7 @@
 }
 
 .md {
-  --ion-toolbar-background: var(--ion-color-primary);
   --ion-toolbar-color: #fff;
   --ion-toolbar-color-activated: #fff;
 }
+
