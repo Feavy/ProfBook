@@ -32,6 +32,7 @@ ion-grid {
 
 .avatar {
     width: 100px;
+    height: 100px;
     margin: auto;
     margin-bottom: 1em;
 }
@@ -39,4 +40,62 @@ ion-grid {
 .info {
     margin: 0 1em 0 1em;
     text-align: justify;
+}
+
+.popover-viewport>h2 {
+    margin-left: 1em;
+}
+
+.menuButton {
+    cursor: pointer;
+}
+
+.menuButton:hover {
+    --ion-background-color: #EEE;
+}
+
+.iconButton {
+    cursor: pointer;
+    border-radius: 40%;
+    transition: all .3s;
+}
+
+.iconButton:hover {
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+ion-fab-button {
+    position: relative;
+    right: 20px;
+    bottom: 10px;
+}
+
+#imgUploadButton {
+    font-size: 20px;
+    cursor: pointer;
+    height: 35px;
+    width: 35px;
+    opacity: 0;
+}
+
+#imgUploadContainer {
+    position: absolute;
+    top: 16px;
+    left: 51%;
+    cursor: pointer;
+}
+
+#imgUploadContainer>span {
+    background-color: black;
+    color: white;
+    display: inline-block;
+    padding: 5px 10px 10px 12px;
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    opacity: .75;
+    border-radius: 50%;
+    cursor: pointer;
 }
