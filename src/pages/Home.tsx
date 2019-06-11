@@ -13,7 +13,7 @@ class Home extends React.Component<{history:History}, {}> {
     
     firebase.auth().onAuthStateChanged(user => {
       if(user) {
-        this.props.history.replace('/main');
+        this.props.history.push('/main');
       }
     });
   }
@@ -25,7 +25,7 @@ class Home extends React.Component<{history:History}, {}> {
         <IonContent padding>
          <h1 className="title">ProfBook</h1>
          <IonButton style={{marginTop: "15vh"}} class="button" color="primary" onClick={() => {
-           history.push('/connexion');
+           history.replace('/connexion');
          }}>Connexion</IonButton>
         </IonContent>
       </>

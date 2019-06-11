@@ -44,22 +44,11 @@ class App extends React.Component<{}, {path:string}> {
     };
     // Initialize Firebase
 
-    this.state = {path: '/home'};
-
     firebase.initializeApp(firebaseConfig);
-
-    console.log(firebase.auth());
-
-    firebase.auth().onAuthStateChanged(user => {
-      if(user) {
-        this.setState({path: '/main'});
-      }
-    });
   }
   render() {
     return (
       <Router>
-      <Route exact path="/"/>
       <Redirect to='/home'/>
       <div className="App">
         <IonPage>

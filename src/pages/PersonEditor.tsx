@@ -1,4 +1,4 @@
-import { IonContent, IonHeader, IonToolbar, IonImg, IonIcon, IonSelect, IonItem, IonLabel, IonSelectOption, IonGrid, IonRow, IonCol, IonList, IonAvatar, IonTitle, IonNav, IonBackButton, IonInput, IonTextarea, IonAlert, IonButton } from '@ionic/react';
+import { IonContent, IonHeader, IonToolbar, IonImg, IonIcon, IonSelect, IonItem, IonLabel, IonSelectOption, IonBackButton, IonInput, IonTextarea, IonAlert } from '@ionic/react';
 import React, { ChangeEvent } from 'react';
 
 import './Main.css';
@@ -7,6 +7,8 @@ import PersonData from '../data/Person';
 import { SelectChangeEventDetail } from '@ionic/core';
 
 import firebase from "firebase";
+
+import modulesList from "../data/Modules";
 
 import { History } from 'history';
 
@@ -21,6 +23,9 @@ interface State {
 
   errorMsg: string;
   successMsg: string;
+
+  isIdSelectVisible: boolean;
+  selectedId: string;
 }
 
 class Person extends React.Component<{ history: History }, State> {
@@ -28,7 +33,9 @@ class Person extends React.Component<{ history: History }, State> {
 
   private modules: string[];
 
-  private currentId: string;
+  private prenomNom:string;
+
+  private users:{id:string, name:string}[];
 
   constructor(props: { history: History }) {
     super(props);
@@ -40,15 +47,51 @@ class Person extends React.Component<{ history: History }, State> {
     this.setModules = this.setModules.bind(this);
     this.setFormation = this.setFormation.bind(this);
     this.selectImage = this.selectImage.bind(this);
+    this.setId = this.setId.bind(this);
 
     this.save = this.save.bind(this);
 
-    this.currentId = "";
+    this.users = [];
+
+    this.prenomNom = "";
+    this.isCreation = true;
+    this.modules = [];
+
+    var user: firebase.User | null = firebase.auth().currentUser;
+
+    var showIdSelectIfAdmin = (user:any) => {
+      firebase.firestore().doc("/users/" + user.uid).get().then(value => {
+        var data: any = value.data();
+        if (data.role == "admin") {
+          firebase.firestore().collection("users").where("role", "==", "enseignant").get().then(values => {
+            values.forEach(value => {
+              this.users.push({id: value.id, name:value.data().name});
+            });
+            this.setState({ isIdSelectVisible: true });
+          }).catch(e => console.log(e));
+        }else{
+          this.setState({ isIdSelectVisible: false });
+        }
+      }).catch(e => console.log(e));
+    }
+
+    if (user)
+      showIdSelectIfAdmin(user);
+    else
+      firebase.auth().onAuthStateChanged(user => {
+        showIdSelectIfAdmin(user);
+      });
+
+    var id:string = "";
+
+    if(history.state.state && history.state.state.id)
+      id = history.state.state.id;
 
     if (history.state.state && history.state.state.person) {
-      this.isCreation = false;
       var p: PersonData = history.state.state.person;
-      this.currentId = p.id;
+      this.isCreation = p.prenom.length == 0;
+      id = p.id;
+      this.prenomNom = p.prenom + " " + p.nom;
       this.state = {
         prenomNom: p.prenom + " " + p.nom,
         avatar: p.avatar,
@@ -58,23 +101,42 @@ class Person extends React.Component<{ history: History }, State> {
         modules: p.modules,
         description: p.description,
         errorMsg: "",
-        successMsg: ""
+        successMsg: "",
+        isIdSelectVisible: false,
+        selectedId: id
       }
       this.modules = p.modules;
-    } else {
-      this.isCreation = true;
-      this.state = {
-        prenomNom: "",
-        avatar: "data:image/png;base64,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",
-        initiales: "",
-        fonction: "Enseignant",
-        formation: "DUT",
-        modules: [],
-        description: "",
+    }
+  }
+
+  componentWillReceiveProps(props:{history:History}, state:State) {
+    var id:string = "";
+
+    this.prenomNom = "";
+    this.isCreation = true;
+    this.modules = [];
+
+    if(history.state.state && history.state.state.id)
+      id = history.state.state.id;
+
+    if (history.state.state && history.state.state.person) {
+      var p: PersonData = history.state.state.person;
+      this.isCreation = p.prenom.length == 0;
+      id = p.id;
+      this.prenomNom = p.prenom + " " + p.nom;
+      this.setState ({
+        prenomNom: p.prenom + " " + p.nom,
+        avatar: p.avatar,
+        initiales: p.initiales,
+        fonction: p.fonction,
+        formation: p.formation,
+        modules: p.modules,
+        description: p.description,
         errorMsg: "",
-        successMsg: ""
-      }
-      this.modules = [];
+        successMsg: "",
+        selectedId: id
+      });
+      this.modules = p.modules;
     }
   }
 
@@ -144,7 +206,7 @@ class Person extends React.Component<{ history: History }, State> {
         nom = rep[2];
       }
       if (this.isCreation) {
-        firebase.firestore().collection("fiches").add(
+        firebase.firestore().collection("fiches").doc(this.state.selectedId).set(
           {
             prenom: prenom,
             avatar: avatar,
@@ -156,25 +218,25 @@ class Person extends React.Component<{ history: History }, State> {
             description: description
           }).then(function (docRef: any) {
             self.setState({ successMsg: "La fiche a bien été créée." });
-            self.props.history.replace("/main");
+            self.props.history.goBack();
           })
           .catch(function (error: any) {
             self.setState({ errorMsg: "Échec lors de l'ajout dans la base de données : <br>" + error });
           });
-      } else {
-        firebase.firestore().collection("fiches").doc(this.currentId).update(
-          {
-            prenom: prenom,
-            avatar: avatar,
-            nom: nom,
-            initiales: initiales,
-            fonction: fonction,
-            formation: formation,
-            modules: this.modules,
-            description: description
-          }).then(function (docRef: any) {
-            self.setState({ successMsg: "La fiche a bien été mise à jour." });
-            self.props.history.replace("/main");
+        } else {
+          firebase.firestore().collection("fiches").doc(this.state.selectedId).update(
+            {
+              prenom: prenom,
+              avatar: avatar,
+              nom: nom,
+              initiales: initiales,
+              fonction: fonction,
+              formation: formation,
+              modules: this.modules,
+              description: description
+            }).then(function (docRef: any) {
+              self.setState({ successMsg: "La fiche a bien été mise à jour." });
+              self.props.history.go(-2);
           })
           .catch(function (error: any) {
             self.setState({ errorMsg: "Échec lors de la mise à jour dans la base de données : <br>" + error });
@@ -187,9 +249,12 @@ class Person extends React.Component<{ history: History }, State> {
     }
   }
 
+  setId(e:any) {
+    this.setState({selectedId: e.target.value});
+  }
+
   selectImage(e: ChangeEvent) {
     var elem: HTMLInputElement = e.target as HTMLInputElement;
-    console.log(elem.files);
     var reader = new FileReader();
 
     var self = this;
@@ -209,7 +274,7 @@ class Person extends React.Component<{ history: History }, State> {
   }
 
   render() {
-    const { prenomNom, initiales, fonction, formation, modules, description, avatar, errorMsg, successMsg } = this.state;
+    const { prenomNom, initiales, fonction, formation, modules, description, avatar, errorMsg, successMsg, isIdSelectVisible, selectedId } = this.state;
     return (
       <>
         <IonAlert
@@ -230,9 +295,9 @@ class Person extends React.Component<{ history: History }, State> {
         />
         <IonHeader>
           <IonToolbar>
-            <IonBackButton style={{ float: "left", width: "50px", margin: "8px .5em 0 .5em" }} goBack={() => console.log("back")} />
+            <IonIcon onClick={e => this.props.history.goBack()} class="iconButton2" name="arrow-back" style={{ width: "50px", fontSize: "40px", margin: "11px 8px 0px 8px", float: "left" }} />
             <IonIcon class="iconButton" style={{ float: "right", fontSize: "50px", margin: "5px 5px 0px 0px" }} name="save" onClick={this.save} />
-            <h1>{this.isCreation ? "Nouvelle fiche" : "Édition : " + prenomNom}</h1>
+            <h1>{this.isCreation ? "Nouvelle fiche" : "Édition : " + this.prenomNom}</h1>
           </IonToolbar>
         </IonHeader>
 
@@ -262,6 +327,7 @@ class Person extends React.Component<{ history: History }, State> {
                 display: 'block',
                 margin: 'auto'
               }} >
+
                 <IonLabel position="stacked">Fonction</IonLabel>
                 <IonSelect multiple={false} interface="popover" value={fonction} onIonChange={this.setFonction}>
                   <IonSelectOption value="Enseignant">Enseignant</IonSelectOption>
@@ -270,6 +336,20 @@ class Person extends React.Component<{ history: History }, State> {
                 </IonSelect>
               </IonItem>
             </div>
+            { isIdSelectVisible && (
+              <>
+                <h3>Compte lié :</h3>
+                <IonItem>
+                  <IonLabel></IonLabel>
+                  <IonSelect value={selectedId} onIonChange={this.setId}>
+                    {this.users.map(user => (
+                      <IonSelectOption value={user.id} key={user.id}>{user.name}</IonSelectOption>
+                    ))}
+                  </IonSelect>
+                </IonItem>
+              </>
+              )
+            }
             <h3>Formation :</h3>
             <IonItem>
               <IonLabel></IonLabel>
@@ -281,10 +361,10 @@ class Person extends React.Component<{ history: History }, State> {
             <h3>Modules :</h3>
             <IonItem>
               <IonLabel></IonLabel>
-              <IonSelect multiple={true} value={modules} onIonChange={this.setModules}>
-                <IonSelectOption value="IAP">IAP</IonSelectOption>
-                <IonSelectOption value="POO">POO</IonSelectOption>
-                <IonSelectOption value="AMN">AMN</IonSelectOption>
+              <IonSelect multiple={true} onIonChange={this.setModules}>
+                {modulesList.map(module => (
+                  <IonSelectOption value={module} key={module}>{module}</IonSelectOption>
+                ))}
               </IonSelect>
             </IonItem>
             <h3>Descriptif :</h3>
